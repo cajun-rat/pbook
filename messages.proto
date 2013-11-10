@@ -1,0 +1,14 @@
+message client_to_server {
+	optional hello hello = 1;
+	optional whereis whereis = 2;
+}
+
+message hello {
+	required string nickname = 1;
+	required bytes publickey = 2;
+}
+
+message whereis {
+	required bytes who = 1;
+	required bytes tell = 2;
+}

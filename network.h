@@ -1,3 +1,5 @@
+#ifndef __NETWORK_H
+#define __NETWORK_H
 /* Network.h - Networking abstraction.
 
 This provides an abstraction over the UDP/IP networking, and allows mock
@@ -10,7 +12,9 @@ network implementations to be used for NAT traversal testing. */
 using namespace std;
 using namespace boost::asio::ip;
 
-/* A network endpoint maps one-to-one with a public/private key pair. */
+/* A network endpoint maps one-to-one with a public/private key pair. 
+Classes that want to tallk to the network will inheirit from this. */
+
 class network_endpoint
 {
 	public:
@@ -31,21 +35,25 @@ class network
 		virtual void removemessagehandler(network_endpoint* handler) = 0;
 };
 
-class mocknetwork 
+/* mockinternet -> mockinternet 
+mockinternetconnection -> mockinternetconnection
+*/
+class mockinternet 
 {
 	public:
 		set<network_endpoint*> m_handlers;
 };
 
-class mocknetworkendpoint : public network
+class mockinternetconnection : public network
 {
 	public:
-		mocknetworkendpoint(mocknetwork& net, address clientip);
+		mockinternetconnection(mockinternet& net, address clientip);
 		virtual void sendmsg(string msg, string pk);
 		virtual void addmessagehandler(network_endpoint* handler);
 		virtual void removemessagehandler(network_endpoint* handler);	
 	private:
-		mocknetwork& m_network;
+		mockinternet& m_network;
 		address m_clientip;
 };
 
+#endif

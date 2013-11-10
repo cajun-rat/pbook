@@ -33,6 +33,6 @@ TARGET_LINK_LIBRARIES(pbook
 
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS messages.proto)
 
-add_executable(bar bar.cpp mocknetwork.cpp ${PROTO_SRCS} ${PROTO_HDRS})
+add_executable(bar bar.cpp mocknetwork.cpp client.cpp server.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 target_link_libraries(bar ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES})
 

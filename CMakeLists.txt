@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
+cmake_policy(SET CMP0015 NEW)
 set(Boost_DEBUG 1) 
 project(pbook)
 
@@ -15,10 +16,29 @@ QT4_WRAP_CPP(pbook_headers_moc mainwindow.h)
 
 INCLUDE(${QT_USE_FILE})
 ADD_DEFINITIONS(${QT_DEFINITIONS}) 
-
+ADD_DEFINITIONS(-std=c++0x)
 
 QT4_WRAP_UI(pbook_forms_headers mainwindow.ui)
 # QT4_ADD_RESOURCES(helloworld_RESOURCES_RCC ${helloworld_RESOURCES})
+
+if (WIN32)
+	include_directories (lib/nacl/win32/include)
+	link_directories(lib/nacl/win32/lib)
+elseif ("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+	include_directories (lib/nacl/amd64/include)
+	link_directories(lib/nacl/amd64/lib)
+ELSE()
+	include_directories (lib/nacl/x86/include)
+	link_directories(lib/nacl/x86/lib)
+ENDIF()
+
+if(WIN32)
+	set(RNGSRC cryptgenrandom.c)
+ELSE()
+	set(RNGSRC devurandom.c)
+ENDIF()
+
+
 
 ADD_EXECUTABLE(pbook main.cpp mainwindow.cpp 
     ${pbook_headers_moc}
@@ -33,6 +53,6 @@ TARGET_LINK_LIBRARIES(pbook
 
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS messages.proto)
 
-add_executable(bar bar.cpp mocknetwork.cpp client.cpp server.cpp ${PROTO_SRCS} ${PROTO_HDRS})
-target_link_libraries(bar ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES})
+add_executable(bar bar.cpp mocknetwork.cpp client.cpp server.cpp ${PROTO_SRCS} ${PROTO_HDRS} ${RNGSRC} )
+target_link_libraries(bar ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} nacl)
 

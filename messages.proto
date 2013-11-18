@@ -12,3 +12,11 @@ message whereis {
 	required bytes who = 1;
 	required bytes tell = 2;
 }
+
+message anything_to_client {
+	optional instantmessage instantmessage = 1;
+}
+
+message instantmessage {
+	required string message = 1;
+}

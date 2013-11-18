@@ -14,5 +14,11 @@ int main() {
 	server s(servernet);
 	client c1(client1net);
 	client c2(client2net);
+
+	contact contact1 {c1.pk(), "Client 1"};
+	c2.sendinstantmessage(contact1, "I'm bored hmu");
+
+	cout << "Client 1:" <<c1 <<"\n";
+
 	return 0;
 }

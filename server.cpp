@@ -21,7 +21,8 @@ void server::rxmsg(string msgdata, address sender) {
 	cout << "server: got msg " << msg.ShortDebugString() << "\n";
 	if (msg.has_hello()) {
 		hello h(msg.hello()); 
-		cout << "server: got hello from " << h.publickey() 
+		publickey pk(h.publickey());
+		cout << "server: got hello from " << pk
 									<< " ip " << sender<< "\n";
 		m_lastknownaddress[h.publickey()] = sender;
 	}

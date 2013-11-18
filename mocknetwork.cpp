@@ -3,12 +3,12 @@
 mockinternetconnection::mockinternetconnection(mockinternet& net, address clientip)
 	: m_network(net), m_clientip(clientip) { }
 
-void mockinternetconnection::sendmsg(string msg, string pk) {
+void mockinternetconnection::sendmsg(string msg, shared_ptr<publickey> pk) {
 	int found = 0;
 	set<network_endpoint*> handlers = m_network.m_handlers;
 	for (set<network_endpoint*>::iterator h = handlers.begin(); h != handlers.end(); ++h) {
 		network_endpoint* mh = *h;
-		if (mh->pk() == pk) {
+		if (mh->key().pk() == pk) {
 			found++;
 			mh->rxmsg(msg, m_clientip);
 		} 

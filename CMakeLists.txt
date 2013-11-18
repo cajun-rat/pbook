@@ -35,10 +35,20 @@ ENDIF()
 if(WIN32)
 	set(RNGSRC cryptgenrandom.c)
 ELSE()
-	set(RNGSRC devurandom.c)
+	set(RNGSRC devurandom.cpp)
 ENDIF()
 
-
+if(MSVC)
+  # Force to always compile with W4
+  if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+    string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+  endif()
+elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+  # Update if necessary
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
+endif()
 
 ADD_EXECUTABLE(pbook main.cpp mainwindow.cpp 
     ${pbook_headers_moc}
@@ -53,6 +63,6 @@ TARGET_LINK_LIBRARIES(pbook
 
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS messages.proto)
 
-add_executable(bar bar.cpp mocknetwork.cpp client.cpp server.cpp ${PROTO_SRCS} ${PROTO_HDRS} ${RNGSRC} )
+add_executable(bar bar.cpp mocknetwork.cpp client.cpp server.cpp crypto.cpp ${PROTO_SRCS} ${PROTO_HDRS} ${RNGSRC} )
 target_link_libraries(bar ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} nacl)
 

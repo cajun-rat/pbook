@@ -2,21 +2,16 @@
 #include "client.h"
 #include "messages.pb.h"
 
-client::client(network &net) : m_network(net) {
+client::client(network &net, shared_ptr<publickey> serverkey) : m_network(net) {
 	net.addmessagehandler(this); 
 	client_to_server hellomsg;
 	hello *h = hellomsg.mutable_hello();
-	h->set_publickey(pk());
+	h->set_publickey(key().pk()->bytes());
 	h->set_nickname("phil");
 
 	string ser;
 	hellomsg.SerializeToString(&ser);
-	net.sendmsg(ser, "todoserverpk");
-
-	uint8_t pk[crypto_box_PUBLICKEYBYTES], sk[crypto_box_SECRETKEYBYTES];
-	crypto_box_keypair(pk, sk);
-	m_pk = string((const char*) pk, crypto_box_PUBLICKEYBYTES);
-	m_sk = string((const char*) sk, crypto_box_SECRETKEYBYTES);
+	net.sendmsg(ser, serverkey);
 }
 
 client::~client() {
@@ -34,7 +29,7 @@ void client::sendinstantmessage(contact c, string text) {
 }
 
 
-void client::rxmsg(string msgdata, address sender) {
+void client::rxmsg(string msgdata, address) {
 	anything_to_client m;
 	m.ParseFromString(msgdata);
 	cout << "client: got msg " << m.ShortDebugString() << "\n";
@@ -44,6 +39,7 @@ void client::rxmsg(string msgdata, address sender) {
 }
 
 ostream& operator<<(ostream& os, const client& c) {
-	os << "client()";
+	os << "client(" << c.pk() << ")";
+	return os;
 }
 

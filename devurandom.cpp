@@ -3,6 +3,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+extern "C" {
+	void randombytes(unsigned char *x, unsigned long long xlen);
+}
+
 /* it's really stupid that there isn't a syscall for this */
 
 static int fd = -1;

@@ -2,9 +2,11 @@
 #define __CLIENT_H
 #include <vector>
 #include <string>
-
+#include <boost/signals2/signal.hpp>
 #include "network.h"
 #include "crypto.h"
+
+using namespace boost::signals2;
 
 struct contact
 {
@@ -24,6 +26,7 @@ class client : public network_endpoint
 		/* network_endpoint */
 		virtual void rxmsg(string msg, address sender);
 		friend ostream& operator<<(ostream& os, const client& c);
+		signal<void (const string&)> onmsg;
 	private:
 		network& m_network;
 };

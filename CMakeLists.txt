@@ -10,7 +10,7 @@ include(FindProtobuf)
 set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
-find_package(Boost 1.46 COMPONENTS system)
+find_package(Boost 1.46 COMPONENTS system unit_test_framework REQUIRED)
  
 QT4_WRAP_CPP(pbook_headers_moc mainwindow.h)
 
@@ -63,6 +63,11 @@ TARGET_LINK_LIBRARIES(pbook
 
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS messages.proto)
 
-add_executable(bar bar.cpp mocknetwork.cpp client.cpp server.cpp crypto.cpp ${PROTO_SRCS} ${PROTO_HDRS} ${RNGSRC} )
+set(APP_SRCS client.cpp server.cpp crypto.cpp ${PROTO_SRCS} ${PROTO_HDRS} ${RNGSRC})
+set(TEST_SRCS mocknetwork.cpp)
+add_executable(tests tests.cpp ${TEST_SRCS} ${APP_SRCS})
+
+add_executable(bar bar.cpp ${TEST_SRCS} ${APP_SRCS})
+target_link_libraries(tests ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} nacl)
 target_link_libraries(bar ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} nacl)
 

@@ -34,12 +34,12 @@ void client::rxmsg(string msgdata, address) {
 	m.ParseFromString(msgdata);
 	cout << "client: got msg " << m.ShortDebugString() << "\n";
 	if (m.has_instantmessage()) {
-		cout << "im: " << m.instantmessage().message() << "\n";
+		onmsg(m.instantmessage().message());
 	}
 }
 
 ostream& operator<<(ostream& os, const client& c) {
-	os << "client(" << c.pk() << ")";
+	os << "client(" << *c.pk() << ")";
 	return os;
 }
 

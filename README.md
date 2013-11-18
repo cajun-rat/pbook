@@ -11,7 +11,7 @@ Building
 --------
 mkdir build
 cd build
-sudo apt-get install cmake libboost-system-dev libboost-dev protobuf-compiler libprotobuf-dev
+sudo apt-get install cmake libboost-system-dev libboost-dev protobuf-compiler libprotobuf-dev libboost-test-dev
 cmake ..
 make
 

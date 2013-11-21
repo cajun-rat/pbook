@@ -4,14 +4,12 @@
 #include <map>
 #include "crypto.h"
 
-class server : public network_endpoint
+class server
 {
 	public:
-		server(network &net);
-		~server();
-		virtual void rxmsg(string msg, address sender);
+		server(udp_connection &net);
 	private:
-		network& m_network;
+		udp_connection& m_network;
 		map<string, address> m_lastknownaddress;
 };
 

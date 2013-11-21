@@ -1,6 +1,10 @@
 PBOOK
 =====
 
+Next steps
+----------
+Implement networkarpencryptor (and think of a better name for it)
+
 Purpose
 -------
 

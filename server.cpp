@@ -7,14 +7,10 @@
 
 using namespace std;
 
-server::server(network &net) : m_network(net) {
-	m_network.addmessagehandler(this);
+server::server(udp_connection &net) : m_network(net) {
 }
 
-server::~server() {
-	m_network.removemessagehandler(this);
-}
-
+/*
 void server::rxmsg(string msgdata, address sender) {
 	client_to_server msg;
 	msg.ParseFromString(msgdata);
@@ -34,4 +30,4 @@ void server::rxmsg(string msgdata, address sender) {
 }
 
 
-
+*/

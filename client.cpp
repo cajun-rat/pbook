@@ -2,44 +2,34 @@
 #include "client.h"
 #include "messages.pb.h"
 
-client::client(network &net, shared_ptr<publickey> serverkey) : m_network(net) {
-	net.addmessagehandler(this); 
-	client_to_server hellomsg;
-	hello *h = hellomsg.mutable_hello();
-	h->set_publickey(key().pk()->bytes());
+client::client(pbook_connection &net, shared_ptr<publickey>) :
+	m_network(net),
+	m_signalconnection(
+		net.pbook_message_rx.connect(
+			boost::bind(&client::rxmsg, this, _1))) {
+	shared_ptr<pbook_message> msg = make_shared<pbook_message>();
+	hello *h = msg->data.mutable_hello();
 	h->set_nickname("phil");
-
-	string ser;
-	hellomsg.SerializeToString(&ser);
-	net.sendmsg(ser, serverkey);
-}
-
-client::~client() {
-	m_network.removemessagehandler(this);
+	m_network.send_pbook_message(msg);
 }
 
 void client::sendinstantmessage(contact c, string text) {
-	anything_to_client m;
-	instantmessage *im = m.mutable_instantmessage();
+	shared_ptr<pbook_message> msg = make_shared<pbook_message>();
+	instantmessage *im = msg->data.mutable_instantmessage();
 	im->set_message(text);
-
-	string ser;
-	m.SerializeToString(&ser);
-	m_network.sendmsg(ser, c.pk);
+	msg->destination = c.pk;
+	m_network.send_pbook_message(msg);
 }
 
-
-void client::rxmsg(string msgdata, address) {
-	anything_to_client m;
-	m.ParseFromString(msgdata);
-	cout << "client: got msg " << m.ShortDebugString() << "\n";
-	if (m.has_instantmessage()) {
-		onmsg(m.instantmessage().message());
+void client::rxmsg(shared_ptr<pbook_message> msg) {
+	cout << "client: got msg " << msg->data.ShortDebugString() << "\n";
+	if (msg->data.has_instantmessage()) {
+		onmsg(msg->data.instantmessage().message());
 	}
 }
 
-ostream& operator<<(ostream& os, const client& c) {
-	os << "client(" << *c.pk() << ")";
+ostream& operator<<(ostream& os, const client&) {
+	os << "client()";
 	return os;
 }
 

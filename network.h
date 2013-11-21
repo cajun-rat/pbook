@@ -6,57 +6,82 @@ This provides an abstraction over the UDP/IP networking, and allows mock
 network implementations to be used for NAT traversal testing. */
 
 #include <boost/asio/ip/address.hpp>
+#include <boost/signals2/signal.hpp>
 #include <set>
 #include <string>
 #include "crypto.h"
+#include "messages.pb.h"
 
 using namespace std;
 using namespace boost::asio::ip;
+using namespace boost::signals2;
 
-/* A network endpoint maps one-to-one with a public/private key pair. 
-Classes that want to talk to the network will inheirit from this. */
-
-class network_endpoint
+class udp_datagram
 {
-	public:
-		virtual void rxmsg(string msg, address sender) = 0;
-		virtual const keypair& key() const { return m_key; }
-		virtual shared_ptr<publickey> pk() const { return key().pk(); }
-	protected:
-		keypair m_key;
+	string data;
+	address sender;
+	address destination;
 };
 
-/* A network abstracts the IP/UDP transport layer, and provides the ability
-to send a datagram securely to a given public key. It includes encryption and
-and ARP */
-
-class network
+class udp_connection
 {
-	public:
-		virtual void sendmsg(string msg, shared_ptr<publickey> destination) = 0;
-		virtual void addmessagehandler(network_endpoint* handler) = 0;
-		virtual void removemessagehandler(network_endpoint* handler) = 0;
+	virtual void send_udp(shared_ptr<udp_datagram> datagram) = 0;
+	signal<void (shared_ptr<udp_datagram>)> udp_rx;
 };
 
-/* mockinternet -> mockinternet 
-mockinternetconnection -> mockinternetconnection
-*/
+class pbook_message
+{
+	public:
+		any_message data;
+		shared_ptr<keypair> sender;
+		shared_ptr<publickey> destination;
+};
+
+class pbook_connection
+{
+	public:
+		virtual void send_pbook_message(shared_ptr<pbook_message> message) = 0;
+		signal<void (shared_ptr<pbook_message>)> pbook_message_rx;
+};
+
+class networkarpencryptor : pbook_connection
+{
+	public:
+		networkarpencryptor(udp_connection &net);
+		virtual void send_pbook_message(shared_ptr<pbook_message> message);
+	private:
+		udp_connection &m_net;
+};	
+
+/* For testing. Could also do NAT simulation */
+class mockinternetendpoint;
+
 class mockinternet 
 {
-	public:
-		set<network_endpoint*> m_handlers;
+	set<mockinternetendpoint*> connections;
+};
+class mockinternetendpoint : public udp_connection 
+{
+	mockinternetendpoint(mockinternet &net, address ip);
+	void send_udp(shared_ptr<udp_datagram> datagram);
 };
 
-class mockinternetconnection : public network
+class mock_pbook_connection;
+class mock_pbook_hub
 {
 	public:
-		mockinternetconnection(mockinternet& net, address clientip);
-		virtual void sendmsg(string msg, shared_ptr<publickey> pk);
-		virtual void addmessagehandler(network_endpoint* handler);
-		virtual void removemessagehandler(network_endpoint* handler);	
+		set<mock_pbook_connection*>	connections;
+};
+
+class mock_pbook_connection : public pbook_connection
+{
+	public:
+		mock_pbook_connection(mock_pbook_hub &hub, shared_ptr<publickey> user);
+		~mock_pbook_connection();
+		virtual void send_pbook_message(shared_ptr<pbook_message> message);
+		shared_ptr<publickey> user;
 	private:
-		mockinternet& m_network;
-		address m_clientip;
+		mock_pbook_hub& m_hub;
 };
 
 #endif

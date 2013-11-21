@@ -1,28 +1,25 @@
 #include "network.h"
 
-mockinternetconnection::mockinternetconnection(mockinternet& net, address clientip)
-	: m_network(net), m_clientip(clientip) { }
+mock_pbook_connection::mock_pbook_connection(mock_pbook_hub &hub, shared_ptr<publickey> user_) :
+	user(user_), m_hub(hub) {
+	m_hub.connections.insert(this);
+}
 
-void mockinternetconnection::sendmsg(string msg, shared_ptr<publickey> pk) {
+mock_pbook_connection::~mock_pbook_connection() {
+	m_hub.connections.erase(this);
+}
+
+void mock_pbook_connection::send_pbook_message(shared_ptr<pbook_message> message) {
+	set<mock_pbook_connection*> &conns = m_hub.connections;
+
 	int found = 0;
-	set<network_endpoint*> handlers = m_network.m_handlers;
-	for (set<network_endpoint*>::iterator h = handlers.begin(); h != handlers.end(); ++h) {
-		network_endpoint* mh = *h;
-		if (mh->key().pk() == pk) {
+	for (set<mock_pbook_connection*>::iterator h = conns.begin(); h!= conns.end(); ++h) {
+		mock_pbook_connection *c = *h;
+		if (c->user == message->destination) {
 			found++;
-			mh->rxmsg(msg, m_clientip);
-		} 
+			c->pbook_message_rx(message);
+		}
 	}
-	cout << "mockinternet: sent to " << found << " people\n";
+	cout << "mock_pbook_connection sent to " << found << " people" << endl;
 }
-
-void mockinternetconnection::addmessagehandler(network_endpoint* handler) {
-	m_network.m_handlers.insert(handler);
-}
-
-void mockinternetconnection::removemessagehandler(network_endpoint* handler) {
-	int rmd = m_network.m_handlers.erase(handler);
-	if (rmd != 1) cout << "Warning nothing removed\n";
-}
-
 

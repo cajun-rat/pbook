@@ -15,20 +15,19 @@ struct contact
 };
 
 
-class client : public network_endpoint
+class client
 {
 	public:
-		client(network &net, shared_ptr<publickey> serverkey);
-		~client();
+		client(pbook_connection &net, shared_ptr<publickey> serverkey);
 		void add_contact(contact c);
 		vector<contact> contacts();
+		void rxmsg(shared_ptr<pbook_message> msg);
 		void sendinstantmessage(contact c, string message);
-		/* network_endpoint */
-		virtual void rxmsg(string msg, address sender);
 		friend ostream& operator<<(ostream& os, const client& c);
 		signal<void (const string&)> onmsg;
 	private:
-		network& m_network;
+		pbook_connection& m_network;
+		scoped_connection m_signalconnection;
 };
 
 #endif

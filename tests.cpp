@@ -13,17 +13,19 @@ struct msg_grabber {
 };
 
 BOOST_AUTO_TEST_CASE (simple_im) {
-	mockinternet net;
-	mockinternetconnection servernet(net, address::from_string("192.168.0.1"));
-	mockinternetconnection client1net(net, address::from_string("192.168.0.2"));
-	mockinternetconnection client2net(net, address::from_string("192.168.0.3"));
+	mock_pbook_hub hub;
+	keypair c1key;
+	mock_pbook_connection c1net(hub, c1key.pk());
+	keypair c2key;
+	mock_pbook_connection c2net(hub, c2key.pk());
 
-	server s(servernet);
-	client c1(client1net, s.pk());
-	client c2(client2net, s.pk());
+	keypair s; /* unused */ 
+	client c1(c1net, s.pk());
+	client c2(c2net, s.pk());
 	msg_grabber lastmsg;
 	scoped_connection c1c(c1.onmsg.connect(std::ref(lastmsg)));
-	contact contact1 {c1.key().pk(), "Client 1"};
+	contact contact1 {c1key.pk(), "Client 1"};
 	c2.sendinstantmessage(contact1, "I'm bored hmu");
 	BOOST_CHECK_EQUAL(lastmsg.msg, "I'm bored hmu");
 }
+

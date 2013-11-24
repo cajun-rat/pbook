@@ -16,7 +16,7 @@ using namespace std;
 using namespace boost::asio::ip;
 using namespace boost::signals2;
 
-class udp_datagram
+struct udp_datagram
 {
 	string data;
 	address sender;
@@ -25,8 +25,9 @@ class udp_datagram
 
 class udp_connection
 {
-	virtual void send_udp(shared_ptr<udp_datagram> datagram) = 0;
-	signal<void (shared_ptr<udp_datagram>)> udp_rx;
+	public:
+		virtual void send_udp(shared_ptr<udp_datagram> datagram) = 0;
+		signal<void (shared_ptr<udp_datagram>)> udp_rx;
 };
 
 class pbook_message
@@ -54,17 +55,24 @@ class networkarpencryptor : pbook_connection
 };	
 
 /* For testing. Could also do NAT simulation */
-class mockinternetendpoint;
+class mock_internet_endpoint;
 
-class mockinternet 
+class mock_internet 
 {
-	set<mockinternetendpoint*> connections;
+	friend class mock_internet_endpoint;
+	private:
+		set<mock_internet_endpoint*> connections;
 };
 
-class mockinternetendpoint : public udp_connection 
+class mock_internet_endpoint : public udp_connection 
 {
-	mockinternetendpoint(mockinternet &net, address ip);
-	void send_udp(shared_ptr<udp_datagram> datagram);
+	public:
+		mock_internet_endpoint(mock_internet &net, address ip);
+		~mock_internet_endpoint();
+		virtual void send_udp(shared_ptr<udp_datagram> datagram);
+	private:
+		mock_internet& m_net;
+		address m_ip;
 };
 
 class mock_pbook_connection;

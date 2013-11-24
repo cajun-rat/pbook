@@ -60,6 +60,7 @@ class mockinternet
 {
 	set<mockinternetendpoint*> connections;
 };
+
 class mockinternetendpoint : public udp_connection 
 {
 	mockinternetendpoint(mockinternet &net, address ip);
@@ -69,8 +70,10 @@ class mockinternetendpoint : public udp_connection
 class mock_pbook_connection;
 class mock_pbook_hub
 {
-	public:
+	friend class mock_pbook_connection;
+	private:
 		set<mock_pbook_connection*>	connections;
+		
 };
 
 class mock_pbook_connection : public pbook_connection

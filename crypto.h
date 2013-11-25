@@ -15,16 +15,20 @@ class bad_publickey : public exception {
 };
 
 
-class publickey {
+class publickeydata {
 	public:
-		publickey(const unsigned char* pk);
-		publickey(const string &pk);
+		publickeydata(const unsigned char* pk);
+		publickeydata(const string &pk);
 		string bytes() const { return string((char *)m_key, crypto_box_PUBLICKEYBYTES); }
 	private:
 		unsigned char m_key[crypto_box_PUBLICKEYBYTES];
-	friend ostream& operator<<(ostream& os, const publickey& pk);
-	friend bool operator==(const publickey& lhs, const publickey& rhs);
+	friend ostream& operator<<(ostream& os, const publickeydata& pk);
+	friend bool operator==(const publickeydata& lhs, const publickeydata& rhs);
+	friend bool operator<(const publickeydata& lhs, const publickeydata& rhs);
 };
+
+typedef shared_ptr<publickeydata> publickey;
+bool operator<(const publickey& lhs, const publickey& rhs);
 
 /* A public/private key pair */
 class keypair {
@@ -33,10 +37,10 @@ class keypair {
 		keypair();
 		string decrypt(publickey const &sender, const string &ciphertext);
 		string encrypt(publickey const &destination, const string &plaintext);
-		const shared_ptr<publickey> pk() const { return m_publickey; }
+		const publickey pk() const { return m_publickey; }
 	private:
 		uint8_t m_key[crypto_box_SECRETKEYBYTES];
-		shared_ptr<publickey> m_publickey;
+		publickey m_publickey;
 };
 
 

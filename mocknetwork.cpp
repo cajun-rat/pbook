@@ -25,7 +25,7 @@ void mock_internet_endpoint::send_udp(shared_ptr<udp_datagram> datagram) {
 }
 
 
-mock_pbook_connection::mock_pbook_connection(mock_pbook_hub &hub, shared_ptr<publickey> user_) :
+mock_pbook_connection::mock_pbook_connection(mock_pbook_hub &hub, publickey user_) :
 	user(user_), m_hub(hub) {
 	m_hub.connections.insert(this);
 }

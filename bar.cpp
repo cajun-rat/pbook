@@ -23,6 +23,9 @@ int main() {
 	contact contact1 {c1key.pk(), "Client 1"};
 	c2.sendinstantmessage(contact1, "I'm bored hmu");
 	cout << "Client 1:" << c1 <<"\n";
-
+	
+	publickey k1 = s.pk();
+	publickey k2 = s.pk();
+	cout << "Compare:" << (k1 < k2) << endl;
 	return 0;
 }

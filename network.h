@@ -35,7 +35,7 @@ class pbook_message
 	public:
 		any_message data;
 		shared_ptr<keypair> sender;
-		shared_ptr<publickey> destination;
+		publickey destination;
 };
 
 class pbook_connection
@@ -45,6 +45,11 @@ class pbook_connection
 		signal<void (shared_ptr<pbook_message>)> pbook_message_rx;
 };
 
+/* An entry in the ARP cache. Will include expiry times */
+struct arpentry {
+	address addr;
+};
+
 class networkarpencryptor : pbook_connection
 {
 	public:
@@ -52,6 +57,8 @@ class networkarpencryptor : pbook_connection
 		virtual void send_pbook_message(shared_ptr<pbook_message> message);
 	private:
 		udp_connection &m_net;
+		list<shared_ptr<pbook_message> > m_awaitingarp;
+		map<publickey, arpentry> m_arpentries;
 };	
 
 /* For testing. Could also do NAT simulation */
@@ -87,10 +94,10 @@ class mock_pbook_hub
 class mock_pbook_connection : public pbook_connection
 {
 	public:
-		mock_pbook_connection(mock_pbook_hub &hub, shared_ptr<publickey> user);
+		mock_pbook_connection(mock_pbook_hub &hub, publickey user);
 		~mock_pbook_connection();
 		virtual void send_pbook_message(shared_ptr<pbook_message> message);
-		shared_ptr<publickey> user;
+		publickey user;
 	private:
 		mock_pbook_hub& m_hub;
 };

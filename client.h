@@ -10,7 +10,7 @@ using namespace boost::signals2;
 
 struct contact
 {
-	shared_ptr<publickey> pk;
+	publickey pk;
 	string nickname;
 };
 
@@ -18,7 +18,7 @@ struct contact
 class client
 {
 	public:
-		client(pbook_connection &net, shared_ptr<publickey> serverkey);
+		client(pbook_connection &net, publickey serverkey);
 		void add_contact(contact c);
 		vector<contact> contacts();
 		void rxmsg(shared_ptr<pbook_message> msg);

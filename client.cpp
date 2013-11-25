@@ -2,7 +2,7 @@
 #include "client.h"
 #include "messages.pb.h"
 
-client::client(pbook_connection &net, shared_ptr<publickey>) :
+client::client(pbook_connection &net, publickey) :
 	m_network(net),
 	m_signalconnection(
 		net.pbook_message_rx.connect(

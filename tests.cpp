@@ -36,9 +36,24 @@ BOOST_AUTO_TEST_CASE (internet_im) {
 	mock_internet hub;
 	keypair c1key;
 	keypair c2key;
-	mock_internet_endpoint servernet(hub, address::from_string("192.168.0.1"));
-	mock_internet_endpoint c1net(hub, address::from_string("192.168.0.2"));
-	mock_internet_endpoint c2net(hub, address::from_string("192.168.0.3"));
-	/* TODO */
+	mock_internet_endpoint serverep(hub, address::from_string("192.168.0.1"));
+	mock_internet_endpoint c1ep(hub, address::from_string("192.168.0.2"));
+	mock_internet_endpoint c2ep(hub, address::from_string("192.168.0.3"));
+/*	
+	server s(serverep);
+	keypair c1key, c2key, s;
+	networkarpencryptor c1net(c1ep);
+	networkarpencryptor c2net(c2ep);
+
+	client c1(c1net, s.pk());
+	client c2(c2net, s.pk());
+	client c2(c2net);
+
+	msg_grabber lastmsg;
+	scoped_connection c1c(c1.onmsg.connect(std::ref(lastmsg)));
+	contact contact1 {c1key.pk(), "Client 1"};
+	c2.sendinstantmessage(contact1, "I'm bored hmu");
+*/
+
 }
 

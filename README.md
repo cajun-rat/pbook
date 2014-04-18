@@ -4,7 +4,9 @@ PBOOK
 Next steps
 ----------
 Implement networkarpencryptor (and think of a better name for it)
+ - Get ARP working in arpencrypt.cpp
 Include https://github.com/sakra/cotire
+Port to Qt5
 
 Purpose
 -------
@@ -16,7 +18,7 @@ Building
 --------
 mkdir build
 cd build
-sudo apt-get install cmake libboost-system-dev libboost-dev protobuf-compiler libprotobuf-dev libboost-test-dev
+sudo apt-get install cmake libboost-system-dev libboost-dev protobuf-compiler libprotobuf-dev libboost-test-dev libasio-dev
 cmake ..
 make
 

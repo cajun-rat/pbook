@@ -6,15 +6,14 @@
 #include "network.h"
 #include "crypto.h"
 
-using namespace boost::signals2;
-
 struct contact
 {
+	contact(publickey pk, string nickname);
 	publickey pk;
 	string nickname;
 };
 
-
+/* The top-level interface to pbook, to be used by a GUI */
 class client
 {
 	public:
@@ -24,10 +23,11 @@ class client
 		void rxmsg(shared_ptr<pbook_message> msg);
 		void sendinstantmessage(contact c, string message);
 		friend ostream& operator<<(ostream& os, const client& c);
-		signal<void (const string&)> onmsg;
+		boost::signals2::signal<void (const string&)> onmsg;
 	private:
 		pbook_connection& m_network;
-		scoped_connection m_signalconnection;
+		publickey m_serverkey;
+		boost::signals2::scoped_connection m_signalconnection;
 };
 
 #endif

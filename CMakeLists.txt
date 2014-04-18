@@ -63,11 +63,11 @@ TARGET_LINK_LIBRARIES(pbook
 
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS messages.proto)
 
-set(APP_SRCS client.cpp server.cpp crypto.cpp ${PROTO_SRCS} ${PROTO_HDRS} ${RNGSRC})
+set(APP_SRCS client.cpp server.cpp crypto.cpp arpencrypt.cpp ${PROTO_SRCS} ${PROTO_HDRS} ${RNGSRC})
 set(TEST_SRCS mocknetwork.cpp)
 add_executable(tests tests.cpp ${TEST_SRCS} ${APP_SRCS})
 
 add_executable(bar bar.cpp ${TEST_SRCS} ${APP_SRCS})
-target_link_libraries(tests ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} nacl)
-target_link_libraries(bar ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} nacl)
+target_link_libraries(tests ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} pthread nacl)
+target_link_libraries(bar ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} pthread nacl)
 

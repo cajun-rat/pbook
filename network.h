@@ -14,7 +14,7 @@ network implementations to be used for NAT traversal testing. */
 
 using namespace std;
 using namespace boost::asio::ip;
-using namespace boost::signals2;
+//using namespace boost::signals2;
 
 struct udp_datagram
 {
@@ -27,7 +27,7 @@ class udp_connection
 {
 	public:
 		virtual void send_udp(shared_ptr<udp_datagram> datagram) = 0;
-		signal<void (shared_ptr<udp_datagram>)> udp_rx;
+		boost::signals2::signal<void (shared_ptr<udp_datagram>)> udp_rx;
 };
 
 class pbook_message
@@ -42,24 +42,32 @@ class pbook_connection
 {
 	public:
 		virtual void send_pbook_message(shared_ptr<pbook_message> message) = 0;
-		signal<void (shared_ptr<pbook_message>)> pbook_message_rx;
+		boost::signals2::signal<void (shared_ptr<pbook_message>)> pbook_message_rx;
 };
-
-/* An entry in the ARP cache. Will include expiry times */
-struct arpentry {
-	address addr;
-};
-
-class networkarpencryptor : pbook_connection
+class peer_location;
+class networkarpencryptor : public pbook_connection
 {
 	public:
-		networkarpencryptor(udp_connection &net);
+		networkarpencryptor(udp_connection &net, shared_ptr<keypair> user);
 		virtual void send_pbook_message(shared_ptr<pbook_message> message);
 	private:
 		udp_connection &m_net;
-		list<shared_ptr<pbook_message> > m_awaitingarp;
-		map<publickey, arpentry> m_arpentries;
+		map<publickey, peer_location> m_arpentries;
+		shared_ptr<keypair> m_userkey;
+	friend class peer_location;
 };	
+
+/* An entry in the ARP cache. Will include expiry times */
+class peer_location {
+	public:
+		peer_location() : m_needs_arp(true) {}
+		void send_message(string data);
+	private:
+		bool m_needs_arp;
+		address m_addr;
+		int m_port;
+		vector<string> m_messages_queued;
+};
 
 /* For testing. Could also do NAT simulation */
 class mock_internet_endpoint;

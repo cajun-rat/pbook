@@ -14,6 +14,7 @@ class bad_publickey : public exception {
 	}
 };
 
+class keypair;
 
 class publickeydata {
 	public:
@@ -21,10 +22,12 @@ class publickeydata {
 		publickeydata(const string &pk);
 		string bytes() const { return string((char *)m_key, crypto_box_PUBLICKEYBYTES); }
 	private:
-		unsigned char m_key[crypto_box_PUBLICKEYBYTES];
+		// crypto_box will read off the end of the input see bug.cpp
+		unsigned char m_key[crypto_box_PUBLICKEYBYTES+7];
 	friend ostream& operator<<(ostream& os, const publickeydata& pk);
 	friend bool operator==(const publickeydata& lhs, const publickeydata& rhs);
 	friend bool operator<(const publickeydata& lhs, const publickeydata& rhs);
+	friend class keypair;
 };
 
 typedef shared_ptr<publickeydata> publickey;
@@ -35,13 +38,13 @@ class keypair {
 	public:
 		/* Create a random key pair (for testing) */
 		keypair();
-		string decrypt(publickey const &sender, const string &ciphertext);
-		string encrypt(publickey const &destination, const string &plaintext);
+		string decrypt(publickey const sender, const string &ciphertext);
+		string encrypt(publickey const destination, const string &plaintext);
 		const publickey pk() const { return m_publickey; }
 	private:
-		uint8_t m_key[crypto_box_SECRETKEYBYTES];
+		// crypto_box will read off the end of the input see bug.cpp
+		uint8_t m_key[crypto_box_SECRETKEYBYTES+7];
 		publickey m_publickey;
 };
-
 
 #endif

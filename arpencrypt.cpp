@@ -6,9 +6,13 @@
 
 using namespace std;
 
-networkarpencryptor::networkarpencryptor(udp_connection &net, shared_ptr<keypair> user) :
+networkarpencryptor::networkarpencryptor(udp_connection &net, shared_ptr<keypair> user,
+		publickey arpkey, address arpaddress, int arpport) :
 	m_net(net),
-	m_userkey(user) {
+	m_userkey(user),
+	m_arpkey(arpkey),
+	m_arpaddress(arpaddress),
+	m_arpport(arpport) {
 }
 
 void networkarpencryptor::send_pbook_message(shared_ptr<pbook_message> message) {
@@ -19,19 +23,27 @@ void networkarpencryptor::send_pbook_message(shared_ptr<pbook_message> message) 
 	string ciphertext = message->sender->encrypt(message->destination, plaintext);
 
 	peer_location& peer = m_arpentries[message->destination];
-	peer.send_message(ciphertext);
-}
-
-void peer_location::send_message(string msg) {
-	/* TODO */
-	cout << "Needs arp:" << m_needs_arp << endl; 
-	if (m_needs_arp) {
-		// enqueue the message, we will send it when the arp response arrives
-		m_messages_queued.push_back(msg);
-		// Check for arp timeout
-		// send an arp message
+	if (peer.got_address()) {
+		cout << "Already have address for peer" << endl;
+		shared_ptr<udp_datagram> packet = make_shared<udp_datagram>();
+		packet->data = ciphertext;
+		packet->destination = peer.addr;
+		m_net.send_udp(packet);
 	} else {
-		// TODO: 
+		cout << "Performing Arp" << endl;
+		peer.messages_queued.push_back(ciphertext);
+		// Send arp
+		any_message arpmsg;
+		whereis *arprequest = arpmsg.mutable_whereis();
+		arprequest->set_who(message->destination->bytes()); 
+		string plaintext;
+		arpmsg.SerializeToString(&plaintext);
+		string ciphertext;
+		message->sender->encrypt(m_arpkey, plaintext);
+		shared_ptr<udp_datagram> packet = make_shared<udp_datagram>();
+		packet->data = ciphertext;
+		packet->destination = m_arpaddress;
+		m_net.send_udp(packet);
 	}
 }
 

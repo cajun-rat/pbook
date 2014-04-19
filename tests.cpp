@@ -44,8 +44,8 @@ BOOST_AUTO_TEST_CASE (internet_im) {
 	cout << "server is " << *skey.pk() << endl;
 	cout << "client 1 is " << *c1key->pk() << endl;
 	cout << "client 2 is " << *c2key->pk() << endl;
-	networkarpencryptor c1net(c1ep, c1key);
-	networkarpencryptor c2net(c2ep, c2key);
+	networkarpencryptor c1net(c1ep, c1key, skey.pk(), address::from_string("192.168.0.1"), 1234);
+	networkarpencryptor c2net(c2ep, c2key, skey.pk(), address::from_string("192.168.0.1"), 1234);
 
 	client c1(c1net, skey.pk());
 	client c2(c2net, skey.pk());

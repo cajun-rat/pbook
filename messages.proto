@@ -10,7 +10,6 @@ message hello {
 
 message whereis {
 	required bytes who = 1;
-	required bytes tell = 2;
 }
 
 message instantmessage {

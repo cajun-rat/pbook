@@ -48,25 +48,31 @@ class peer_location;
 class networkarpencryptor : public pbook_connection
 {
 	public:
-		networkarpencryptor(udp_connection &net, shared_ptr<keypair> user);
+		// net - The upstream connection
+		// user - The key to encrypt/decrypt communication
+		// arp* - The location of the arp server 
+		networkarpencryptor(udp_connection &net, shared_ptr<keypair> user,
+			publickey arpkey, address arpaddress, int arpport);
 		virtual void send_pbook_message(shared_ptr<pbook_message> message);
 	private:
 		udp_connection &m_net;
 		map<publickey, peer_location> m_arpentries;
 		shared_ptr<keypair> m_userkey;
-	friend class peer_location;
+		publickey m_arpkey;
+		address m_arpaddress;
+		int m_arpport;
 };	
 
 /* An entry in the ARP cache. Will include expiry times */
 class peer_location {
 	public:
-		peer_location() : m_needs_arp(true) {}
-		void send_message(string data);
+		peer_location() : m_got_address(false) {}
+		bool got_address() { return m_got_address;}
+		address addr;
+		int port;
+		vector<string> messages_queued;
 	private:
-		bool m_needs_arp;
-		address m_addr;
-		int m_port;
-		vector<string> m_messages_queued;
+		bool m_got_address;
 };
 
 /* For testing. Could also do NAT simulation */

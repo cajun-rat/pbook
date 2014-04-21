@@ -6,7 +6,7 @@
 
 using namespace std;
 
-networkarpencryptor::networkarpencryptor(udp_connection &net, shared_ptr<keypair> user,
+networkarpencryptor::networkarpencryptor(udp_connection &net, keypair user,
 		publickey arpkey, address arpaddress, int arpport) :
 	m_net(net),
 	m_userkey(user),

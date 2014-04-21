@@ -7,7 +7,13 @@
 
 using namespace std;
 
-server::server(udp_connection &net) : m_network(net) {
+server::server(udp_connection &net) 
+	: m_network(net),
+	m_handle_msg_connection(net.udp_rx.connect(bind(&server::handle_msg,this, _1))) {
+}
+
+void server::handle_msg(shared_ptr<udp_datagram>) {
+	cout << "Got message in server" << endl;
 }
 
 /*
@@ -28,6 +34,4 @@ void server::rxmsg(string msgdata, address sender) {
 									" tell " << w.who() << "\n";
 	}
 }
-
-
 */

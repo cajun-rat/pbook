@@ -37,7 +37,7 @@ const uint8_t shared_sk[] = {
 	47, 22, 119, 114, 244, 40, 219, 26, 66, 25, 84, 151, 163, 110, 140, 134};
 
 
-keypair::keypair() {
+keypairdata::keypairdata() {
 	unsigned char pk[crypto_box_PUBLICKEYBYTES];
 	crypto_box_keypair(pk, m_key);
 	m_publickey = make_shared<publickeydata>(pk);
@@ -47,7 +47,7 @@ keypair::keypair() {
    Nonce1, {PK_sender, Nonce2}|dest   , {msg}|dest
                               |public        |sender */
 /* TODO: use the nonces for freshness */
-string keypair::encrypt(publickey const destination, const string &plaintext) {
+string keypairdata::encrypt(publickey const destination, const string &plaintext) {
 	assert(destination.get() != nullptr);
 	assert(crypto_box_PUBLICKEYBYTES == 32);
 	assert(crypto_box_SECRETKEYBYTES == 32);
@@ -64,7 +64,7 @@ string keypair::encrypt(publickey const destination, const string &plaintext) {
 	std::copy(nonce2, nonce2 + crypto_box_NONCEBYTES, back_inserter(firstmsg));
 	vector<uint8_t> ciphertext(firstmsg.size());
 	//cout << "encrypting to " << *destination << endl;
-	uint8_t *pk = &destination->m_key[0];
+	//uint8_t *pk = &destination->m_key[0];
 	//cout << "pk starts at " << std::hex << (uint64_t) pk << endl;
 	//cout << "pk ends at " << std::hex << (uint64_t) &pk[31] << endl;
 	int err = crypto_box(ciphertext.data(), firstmsg.data(), firstmsg.size(),  

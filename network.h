@@ -34,7 +34,7 @@ class pbook_message
 {
 	public:
 		any_message data;
-		shared_ptr<keypair> sender;
+		keypair sender;
 		publickey destination;
 };
 
@@ -51,13 +51,13 @@ class networkarpencryptor : public pbook_connection
 		// net - The upstream connection
 		// user - The key to encrypt/decrypt communication
 		// arp* - The location of the arp server 
-		networkarpencryptor(udp_connection &net, shared_ptr<keypair> user,
+		networkarpencryptor(udp_connection &net, keypair user,
 			publickey arpkey, address arpaddress, int arpport);
 		virtual void send_pbook_message(shared_ptr<pbook_message> message);
 	private:
 		udp_connection &m_net;
 		map<publickey, peer_location> m_arpentries;
-		shared_ptr<keypair> m_userkey;
+		keypair m_userkey;
 		publickey m_arpkey;
 		address m_arpaddress;
 		int m_arpport;

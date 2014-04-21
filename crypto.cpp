@@ -49,8 +49,6 @@ keypairdata::keypairdata() {
 /* TODO: use the nonces for freshness */
 string keypairdata::encrypt(publickey const destination, const string &plaintext) {
 	assert(destination.get() != nullptr);
-	assert(crypto_box_PUBLICKEYBYTES == 32);
-	assert(crypto_box_SECRETKEYBYTES == 32);
 	string res;
 	string zeropadding(crypto_box_ZEROBYTES, '\0');
 	uint8_t nonce1[crypto_box_NONCEBYTES], nonce2[crypto_box_NONCEBYTES];
@@ -90,6 +88,11 @@ string keypairdata::encrypt(publickey const destination, const string &plaintext
 
 	return res;
 }
+
+tuple<string,publickey> keypairdata::decrypt(const string& ciphertext) {
+	// TODO
+	return make_tuple("foo", publickey());
+} 
 
 ostream& operator<<(ostream& os, const publickeydata& pk) {
 	os << "pk {" << (int) pk.m_key[0] << ", " << (int) pk.m_key[1] << " ... " << (int) pk.m_key[31] <<"}";

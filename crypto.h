@@ -38,7 +38,7 @@ class keypairdata {
 	public:
 		/* Create a random key pair (for testing) */
 		keypairdata();
-		string decrypt(publickey const sender, const string &ciphertext);
+		tuple<string,publickey> decrypt(const string &ciphertext);
 		string encrypt(publickey const destination, const string &plaintext);
 		const publickey pk() const { return m_publickey; }
 	private:

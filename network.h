@@ -63,6 +63,7 @@ class networkarpencryptor : public pbook_connection
 		int m_arpport;
 };	
 
+
 /* An entry in the ARP cache. Will include expiry times */
 class peer_location {
 	public:

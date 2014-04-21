@@ -15,6 +15,18 @@ struct msg_grabber {
 	}
 };
 
+BOOST_AUTO_TEST_CASE (crypto) {
+	keypairdata sender;
+	keypairdata receiver;
+
+	string msg = "hello";
+
+	string ciphertext = sender.encrypt(receiver.pk(), msg);
+	tuple<string,publickey> x = receiver.decrypt(ciphertext);
+
+	BOOST_CHECK_EQUAL(get<0>(x), msg);
+}
+
 BOOST_AUTO_TEST_CASE (simple_im) {
 	mock_pbook_hub hub;
 	keypair c1key = make_shared<keypairdata>();
@@ -37,8 +49,8 @@ BOOST_AUTO_TEST_CASE (internet_im) {
 	mock_internet_endpoint serverep(hub, address::from_string("192.168.0.1"));
 	mock_internet_endpoint c1ep(hub, address::from_string("192.168.0.2"));
 	mock_internet_endpoint c2ep(hub, address::from_string("192.168.0.3"));
-	server s(serverep);
 	keypair skey = make_shared<keypairdata>();
+	server s(serverep, skey);
 	keypair c1key = make_shared<keypairdata>();
 	keypair c2key = make_shared<keypairdata>();
 	cout << "server is " << *skey->pk() << endl;
@@ -57,6 +69,5 @@ BOOST_AUTO_TEST_CASE (internet_im) {
 	c2.sendinstantmessage(contact1, "I'm bored hmu");
 	// ... they receive it
 	BOOST_CHECK_EQUAL(lastmsg.msg, "I'm bored hmu");
-
 }
 

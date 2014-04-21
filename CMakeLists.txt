@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0015 NEW)
 set(Boost_DEBUG 1) 
 project(pbook)
-
+include(cotire.cmake)
 find_package(Qt4 REQUIRED)
 include(FindProtobuf)
 # find_package(ProtocolBuffers)
@@ -53,14 +53,12 @@ endif()
 ADD_EXECUTABLE(pbook main.cpp mainwindow.cpp 
     ${pbook_headers_moc}
     ${pbook_forms_headers})
-
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${Boost_INCLUDE_DIRS}) 
 TARGET_LINK_LIBRARIES(pbook 
 	${QT_LIBRARIES}
 	${PROTOBUF_LIBRARIES})
-
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS messages.proto)
 
 set(APP_SRCS client.cpp server.cpp crypto.cpp arpencrypt.cpp ${PROTO_SRCS} ${PROTO_HDRS} ${RNGSRC})
@@ -70,4 +68,6 @@ add_executable(tests tests.cpp ${TEST_SRCS} ${APP_SRCS})
 add_executable(bar bar.cpp ${TEST_SRCS} ${APP_SRCS})
 target_link_libraries(tests ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} pthread nacl)
 target_link_libraries(bar ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} pthread nacl)
+cotire(pbook)
+cotire(bar)
 

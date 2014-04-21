@@ -8,9 +8,10 @@
 class server
 {
 	public:
-		server(udp_connection &net);
+		server(udp_connection &net, keypair key);
 	private:
 		udp_connection& m_network;
+		keypair m_key;
 		map<string, address> m_lastknownaddress;
 		void handle_msg(shared_ptr<udp_datagram> msg);
 		boost::signals2::scoped_connection m_handle_msg_connection;

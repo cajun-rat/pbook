@@ -71,7 +71,7 @@ keypairdata::keypairdata() {
    Nonce1, {PK_sender, Nonce2}|dest   , {msg}|dest
                               |public        |sender */
 /* TODO: use the nonces for freshness */
-string keypairdata::encrypt(publickey const destination, const string &plaintext) {
+string keypairdata::encrypt(publickey const destination, const string &plaintext) const {
 	assert(destination.get() != nullptr);
 	string res;
 	string zeropadding(crypto_box_ZEROBYTES, '\0');
@@ -114,9 +114,9 @@ string keypairdata::encrypt(publickey const destination, const string &plaintext
 	return res;
 }
 
-decryptresult keypairdata::decrypt(const string& ciphertext, tuple<string,publickey> &result) {
-	// TODO
+decryptresult keypairdata::decrypt(const string& ciphertext, tuple<string,publickey> &result) const {
 	if (ciphertext.size() < crypto_box_NONCEBYTES) {
+		cout << "ciphertext is only " << ciphertext.size() << " bytes\n";
 		return decryptresult::TooShort;
 	}
 	string::const_iterator i = ciphertext.begin();
@@ -135,7 +135,7 @@ decryptresult keypairdata::decrypt(const string& ciphertext, tuple<string,public
 	vector<uint8_t> firstmsg(firstciphertext.size());
 	int err = crypto_box_open(firstmsg.data(), firstciphertext.data(), firstciphertext.size(), nonce1, 
 		m_publickey->m_key, shared_sk);
-	//cout << "cryptobox_open result" << err << "\n";  
+	//cout << "crypto_box_open result #1:" << err << "\n";  
 	if (err != 0) {
 		return decryptresult::DecryptFailed;
 	}

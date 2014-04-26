@@ -53,9 +53,8 @@ class keypairdata {
 	public:
 		/* Create a random key pair (for testing) */
 		keypairdata();
-		decryptresult decrypt(const string& ciphertext, tuple<string,publickey> &result);
-		tuple<string,publickey> decrypt(const string &ciphertext);
-		string encrypt(publickey const destination, const string &plaintext);
+		decryptresult decrypt(const string& ciphertext, tuple<string,publickey> &result) const;
+		string encrypt(publickey const destination, const string &plaintext) const;
 		const publickey pk() const { return m_publickey; }
 	private:
 		// crypto_box will read off the end of the input see bug.cpp

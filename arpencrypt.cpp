@@ -38,8 +38,7 @@ void networkarpencryptor::send_pbook_message(shared_ptr<pbook_message> message) 
 		arprequest->set_who(message->destination->bytes()); 
 		string plaintext;
 		arpmsg.SerializeToString(&plaintext);
-		string ciphertext;
-		message->sender->encrypt(m_arpkey, plaintext);
+		string ciphertext(message->sender->encrypt(m_arpkey, plaintext));
 		shared_ptr<udp_datagram> packet = make_shared<udp_datagram>();
 		packet->data = ciphertext;
 		packet->destination = m_arpaddress;

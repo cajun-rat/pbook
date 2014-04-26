@@ -16,6 +16,10 @@ publickeydata::publickeydata(const string &bytes) {
 	std::copy(bytes.begin(), bytes.end(), m_key);
 }
 
+publickeydata::publickeydata(const vector<uint8_t>::iterator pk) {
+	std::copy(pk, pk + crypto_box_PUBLICKEYBYTES, m_key);
+}
+
 bool operator==(const publickeydata& lhs, const publickeydata& rhs) {
 	return std::equal(lhs.m_key, lhs.m_key+crypto_box_PUBLICKEYBYTES, rhs.m_key);
 }
@@ -27,6 +31,26 @@ bool operator<(const publickeydata& lhs, const publickeydata& rhs) {
 bool operator<(const publickey& lhs, const publickey& rhs) {
 	return *lhs < *rhs;
 }
+
+ostream& operator<<(ostream& os, const publickeydata& pk) {
+	os << "pk {" << (int) pk.m_key[0] << ", " << (int) pk.m_key[1] << " ... " << (int) pk.m_key[31] <<"}";
+	return os;
+}
+
+
+bool operator==(const publickey& lhs, const publickey& rhs) {
+	return *lhs == *rhs;
+}
+
+bool operator!=(const publickey& lhs, const publickey& rhs) {
+	return !(lhs == rhs);
+}
+
+ostream& operator<<(ostream& os, const publickey& pk) {
+	os << *pk;
+	return os;
+}
+
 
 const uint8_t shared_pk[] = {
 	183, 186, 46, 122, 249, 181, 36, 160, 4, 111, 202, 243, 236, 138, 194, 99,
@@ -58,7 +82,8 @@ string keypairdata::encrypt(publickey const destination, const string &plaintext
 	res.append((char*) nonce1, crypto_box_NONCEBYTES);
 
 	vector<uint8_t> firstmsg(crypto_box_ZEROBYTES);
-	std::copy(destination->m_key, destination->m_key + crypto_box_PUBLICKEYBYTES, back_inserter(firstmsg));
+	unsigned char* senderpk = pk()->m_key;
+	std::copy(senderpk, senderpk + crypto_box_PUBLICKEYBYTES, back_inserter(firstmsg));
 	std::copy(nonce2, nonce2 + crypto_box_NONCEBYTES, back_inserter(firstmsg));
 	vector<uint8_t> ciphertext(firstmsg.size());
 	//cout << "encrypting to " << *destination << endl;
@@ -89,13 +114,49 @@ string keypairdata::encrypt(publickey const destination, const string &plaintext
 	return res;
 }
 
-tuple<string,publickey> keypairdata::decrypt(const string& ciphertext) {
+decryptresult keypairdata::decrypt(const string& ciphertext, tuple<string,publickey> &result) {
 	// TODO
-	return make_tuple("foo", publickey());
+	if (ciphertext.size() < crypto_box_NONCEBYTES) {
+		return decryptresult::TooShort;
+	}
+	string::const_iterator i = ciphertext.begin();
+	// Read out the nonce
+	uint8_t nonce1[crypto_box_NONCEBYTES];
+	std::copy(i, i + crypto_box_NONCEBYTES, nonce1);
+	int firstmsgsize = crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES + crypto_box_ZEROBYTES - crypto_box_BOXZEROBYTES;
+	i+= crypto_box_NONCEBYTES;
+	// Read the first message
+	if (ciphertext.end() - i < firstmsgsize) {
+		return decryptresult::TooShort;
+	}
+	vector<uint8_t> firstciphertext(crypto_box_BOXZEROBYTES);
+	std::copy(i, i + firstmsgsize, back_inserter(firstciphertext));
+	i += firstmsgsize;
+	vector<uint8_t> firstmsg(firstciphertext.size());
+	int err = crypto_box_open(firstmsg.data(), firstciphertext.data(), firstciphertext.size(), nonce1, 
+		m_publickey->m_key, shared_sk);
+	//cout << "cryptobox_open result" << err << "\n";  
+	if (err != 0) {
+		return decryptresult::DecryptFailed;
+	}
+	publickey sender = make_shared<publickeydata>(firstmsg.begin() + crypto_box_ZEROBYTES);
+	//cout << "sender PK:" << *sender << "\n";	
+	uint8_t nonce2[crypto_box_NONCEBYTES];
+	std::copy(firstmsg.begin() + crypto_box_ZEROBYTES + crypto_box_PUBLICKEYBYTES,
+		firstmsg.end(), nonce2);
+	// Read the second message
+	vector<uint8_t> secondciphertext(crypto_box_BOXZEROBYTES);
+	std::copy(i, ciphertext.end(), back_inserter(secondciphertext));
+	vector<uint8_t> secondmsg(secondciphertext.size());
+	int err2 = crypto_box_open(secondmsg.data(), secondciphertext.data(), secondciphertext.size(), nonce2, sender->m_key, m_key);
+	//cout << "crypto_box_open result #2 " << err2 << "\n";
+	if (err2 != 0) {
+		return decryptresult::DecryptFailed;
+	}
+	string msg;
+	std::copy(secondmsg.begin() + crypto_box_ZEROBYTES, secondmsg.end(), back_inserter(msg));
+	get<0>(result) = msg;
+	get<1>(result) = sender;
+	return decryptresult::Success;
 } 
-
-ostream& operator<<(ostream& os, const publickeydata& pk) {
-	os << "pk {" << (int) pk.m_key[0] << ", " << (int) pk.m_key[1] << " ... " << (int) pk.m_key[31] <<"}";
-	return os;
-}
 

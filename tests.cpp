@@ -15,16 +15,31 @@ struct msg_grabber {
 	}
 };
 
-BOOST_AUTO_TEST_CASE (crypto) {
+BOOST_AUTO_TEST_CASE (crypto_too_short) {
+	keypairdata sender;
+	keypairdata receiver;
+
+	string ciphertext = "nope";
+	tuple<string, publickey> x;
+	decryptresult ok = receiver.decrypt(ciphertext, x);
+
+	BOOST_CHECK_EQUAL(ok, decryptresult::TooShort);
+}
+
+BOOST_AUTO_TEST_CASE (crypto_roundtrip) {
 	keypairdata sender;
 	keypairdata receiver;
 
 	string msg = "hello";
-
+	//cout << "sender pk:" << sender.pk() << "\n";
+	//cout << "receiver pk:" << receiver.pk() << "\n";
 	string ciphertext = sender.encrypt(receiver.pk(), msg);
-	tuple<string,publickey> x = receiver.decrypt(ciphertext);
+	tuple<string, publickey> x;
+	decryptresult ok = receiver.decrypt(ciphertext, x);
 
+	BOOST_CHECK_EQUAL(ok, decryptresult::Success);
 	BOOST_CHECK_EQUAL(get<0>(x), msg);
+	BOOST_CHECK_EQUAL(get<1>(x), sender.pk());
 }
 
 BOOST_AUTO_TEST_CASE (simple_im) {
